@@ -31,7 +31,10 @@ const OCCT_LIBS: &[&str] = &[
     "TKXCAF",
     "TKCDF",
     "TKG3d",
-    "TKVCAF"
+    "TKVCAF",
+    "TKV3d",
+    "TKService",
+    "TKHLR"
 ];
 
 fn main() {
@@ -50,6 +53,7 @@ fn main() {
 
     if is_windows {
         println!("cargo:rustc-link-lib=dylib=user32");
+        println!("cargo:rustc-link-lib=Advapi32");
     }
 
     let mut build = cxx_build::bridge("src/lib.rs");
