@@ -1208,6 +1208,7 @@ pub mod ffi {
             reader: Pin<&mut STEPCAFControl_Reader>,
             filename: String,
         ) -> IFSelect_ReturnStatus;
+
         type HandleTDocStdDocument;
         type HandleXCAFDoc_ShapeTool;
         pub fn one_doc_caf_step(reader: Pin<&mut STEPCAFControl_Reader>) -> UniquePtr<HandleTDocStdDocument>;
