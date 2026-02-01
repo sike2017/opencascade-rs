@@ -93,6 +93,7 @@
 #include <STEPCAFControl_Reader.hxx>
 #include <TDocStd_Document.hxx>
 #include <TDF_Label.hxx>
+#include <TDataStd_Name.hxx>
 #endif
 
 // Generic template constructor
@@ -438,6 +439,53 @@ inline std::unique_ptr<HandleXCAFDoc_ShapeTool> get_shape_tool(HandleTDocStdDocu
     Handle(XCAFDoc_ShapeTool) shape_tool = XCAFDoc_DocumentTool::ShapeTool(doc->Main());
     return std::unique_ptr<HandleXCAFDoc_ShapeTool>(new HandleXCAFDoc_ShapeTool(shape_tool));
 }
+
+inline std::unique_ptr<TDF_LabelSequence> get_free_shapes_from_shape_tool(HandleXCAFDoc_ShapeTool &shape_tool) {
+    TDF_LabelSequence labels;
+    shape_tool->GetFreeShapes(labels);
+    auto label_sequence = std::make_unique<TDF_LabelSequence>();
+    for (const auto& label : labels) {
+        label_sequence->Append(label);
+    }
+    return label_sequence;
+}
+
+inline int get_label_sequence_length(const TDF_LabelSequence &label_sequence) {
+    return label_sequence.Length();
+}
+
+inline std::unique_ptr<TDF_Label> get_label_sequence_item_at(TDF_LabelSequence &label_sequence, int index) {
+    TDF_Label label = label_sequence.Value(index);
+    return std::unique_ptr<TDF_Label>(new TDF_Label(label));
+}
+
+inline std::unique_ptr<TDF_Label> find_label_child(const TDF_Label& label, const int index) {
+    TDF_Label childLabel = label.FindChild(index);
+    return std::unique_ptr<TDF_Label>(new TDF_Label(childLabel));
+}
+
+inline int get_label_child_number(const TDF_Label& label) {
+    return label.NbChildren();
+}
+
+inline std::unique_ptr<TopoDS_Shape> get_label_shape(HandleXCAFDoc_ShapeTool &shape_tool, const TDF_Label &label) {
+    TopoDS_Shape shape;
+    shape_tool->GetShape(label, shape);
+    return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(shape));
+}
+
+inline rust::String get_label_name(const TDF_Label &label) {
+    TCollection_ExtendedString ext_str{};
+    Handle(TDataStd_Name) nameAttr;
+    if (label.FindAttribute(TDataStd_Name::GetID(), nameAttr)) {
+        ext_str = nameAttr->Get();
+    }
+    Standard_PCharacter buffer{};
+    ext_str.ToUTF8CString(buffer);
+    std::string name_str = std::string(buffer);
+    return rust::String(name_str);
+}
+
 #endif
 
 // Data Export

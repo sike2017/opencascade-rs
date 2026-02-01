@@ -1215,6 +1215,40 @@ pub mod ffi {
             doc: Pin<&mut HandleTDocStdDocument>,
         ) -> UniquePtr<HandleXCAFDoc_ShapeTool>;
 
+        type TDF_Label;
+        type TDF_LabelSequence;
+
+        pub fn get_free_shapes_from_shape_tool(
+            shape_tool: Pin<&mut HandleXCAFDoc_ShapeTool>
+        ) -> UniquePtr<TDF_LabelSequence>;
+
+        pub fn get_label_sequence_length(
+            seq: &TDF_LabelSequence
+        ) -> i32;
+
+        pub fn get_label_sequence_item_at(
+            seq: Pin<&mut TDF_LabelSequence>,
+            index: i32
+        ) -> UniquePtr<TDF_Label>;
+
+        pub fn get_label_shape(
+            shape_tool: Pin<&mut HandleXCAFDoc_ShapeTool>,
+            L: &TDF_Label
+        ) -> UniquePtr<TopoDS_Shape>;
+
+        pub fn get_label_name(
+            label: &TDF_Label
+        ) -> String;
+
+        pub fn find_label_child(
+            parent: &TDF_Label,
+            index: i32
+        ) -> UniquePtr<TDF_Label>;
+
+        pub fn get_label_child_number(
+            label: &TDF_Label
+        ) -> i32;
+
         // Data Export
         type STEPControl_Writer;
         type IGESControl_Writer;
