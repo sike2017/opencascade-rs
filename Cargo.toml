@@ -3,8 +3,9 @@ members = [
     "crates/kicad-parser", "crates/model-api",
     "crates/opencascade",
     "crates/opencascade-sys",
-    "crates/viewer", "crates/wasm-example",
-    "examples",
+    # "crates/viewer",
+    "crates/wasm-example",
+    # "examples",
 ]
 
 resolver = "2"

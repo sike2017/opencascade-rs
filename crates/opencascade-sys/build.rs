@@ -29,6 +29,9 @@ const OCCT_LIBS: &[&str] = &[
     "TKCAF",
     "TKLCAF",
     "TKXCAF",
+    "TKCDF",
+    "TKG3d",
+    "TKVCAF"
 ];
 
 fn main() {

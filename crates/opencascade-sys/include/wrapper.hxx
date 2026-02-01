@@ -86,6 +86,15 @@
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
 
+#if 1
+#include <XCAFApp_Application.hxx>
+#include <XCAFDoc_DocumentTool.hxx>
+#include <XCAFDoc_ShapeTool.hxx>
+#include <STEPCAFControl_Reader.hxx>
+#include <TDocStd_Document.hxx>
+#include <TDF_Label.hxx>
+#endif
+
 // Generic template constructor
 template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
   return std::unique_ptr<T>(new T(args...));
@@ -382,6 +391,54 @@ inline std::unique_ptr<TopoDS_Shape> one_shape_step(const STEPControl_Reader &re
 inline std::unique_ptr<TopoDS_Shape> one_shape_iges(const IGESControl_Reader &reader) {
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(reader.OneShape()));
 }
+
+#if 1
+inline IFSelect_ReturnStatus read_caf_step(STEPCAFControl_Reader &reader, rust::String theFileName) {
+  reader.SetColorMode(true);
+  reader.SetNameMode(true);
+  reader.SetLayerMode(true);
+  reader.SetMatMode(true);
+  reader.SetPropsMode(true); // 读取其他属性
+  return reader.ReadFile(theFileName.c_str());
+}
+
+typedef opencascade::handle<TDocStd_Document> HandleTDocStdDocument;
+
+inline std::unique_ptr<HandleTDocStdDocument> one_doc_caf_step(STEPCAFControl_Reader &reader) {
+    // 文档句柄
+    Handle(TDocStd_Document) doc;
+
+    // 初始化 XCAF 应用（单例）
+    static Handle(XCAFApp_Application) app = XCAFApp_Application::GetApplication();
+    if (app.IsNull()) {
+        std::cerr << "XCAFApp_Application::GetApplication() returned null." << std::endl;
+        return nullptr;
+    }
+
+    // 创建新文档
+    app->NewDocument("MDTV-XCAF", doc);
+    if (doc.IsNull()) {
+        std::cerr << "Failed to create XCAF document." << std::endl;
+        return nullptr;
+    }
+
+    // 将 STEPCAF 数据传输到文档
+    if (!reader.Transfer(doc)) {
+        std::cerr << "Failed to transfer STEPCAF data to document." << std::endl;
+        return nullptr;
+    }
+
+    // 返回包装后的句柄
+    return std::unique_ptr<HandleTDocStdDocument>(new HandleTDocStdDocument(doc));
+}
+
+typedef opencascade::handle<XCAFDoc_ShapeTool> HandleXCAFDoc_ShapeTool;
+
+inline std::unique_ptr<HandleXCAFDoc_ShapeTool> get_shape_tool(HandleTDocStdDocument &doc) {
+    Handle(XCAFDoc_ShapeTool) shape_tool = XCAFDoc_DocumentTool::ShapeTool(doc->Main());
+    return std::unique_ptr<HandleXCAFDoc_ShapeTool>(new HandleXCAFDoc_ShapeTool(shape_tool));
+}
+#endif
 
 // Data Export
 inline IFSelect_ReturnStatus transfer_shape(STEPControl_Writer &writer, const TopoDS_Shape &theShape) {

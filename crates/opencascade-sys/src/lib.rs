@@ -1171,11 +1171,15 @@ pub mod ffi {
 
         // Data Import
         type STEPControl_Reader;
+        type STEPCAFControl_Reader;
         type IGESControl_Reader;
         type IFSelect_ReturnStatus;
 
         #[cxx_name = "construct_unique"]
         pub fn STEPControl_Reader_ctor() -> UniquePtr<STEPControl_Reader>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn STEPCAFControl_Reader_ctor() -> UniquePtr<STEPCAFControl_Reader>;
 
         #[cxx_name = "construct_unique"]
         pub fn IGESControl_Reader_ctor() -> UniquePtr<IGESControl_Reader>;
@@ -1198,6 +1202,18 @@ pub mod ffi {
         ) -> i32;
         pub fn one_shape_step(reader: &STEPControl_Reader) -> UniquePtr<TopoDS_Shape>;
         pub fn one_shape_iges(reader: &IGESControl_Reader) -> UniquePtr<TopoDS_Shape>;
+
+        // CAF Document
+        pub fn read_caf_step(
+            reader: Pin<&mut STEPCAFControl_Reader>,
+            filename: String,
+        ) -> IFSelect_ReturnStatus;
+        type HandleTDocStdDocument;
+        type HandleXCAFDoc_ShapeTool;
+        pub fn one_doc_caf_step(reader: Pin<&mut STEPCAFControl_Reader>) -> UniquePtr<HandleTDocStdDocument>;
+        pub fn get_shape_tool(
+            doc: Pin<&mut HandleTDocStdDocument>,
+        ) -> UniquePtr<HandleXCAFDoc_ShapeTool>;
 
         // Data Export
         type STEPControl_Writer;
