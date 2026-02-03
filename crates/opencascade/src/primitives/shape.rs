@@ -15,11 +15,11 @@ pub struct Shape {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Shape>,
 }
 
-pub struct TDF_Label {
+pub struct TdfLabel {
     pub(crate) inner: UniquePtr<ffi::TDF_Label>,
 }
 
-pub struct XCAFDoc_ShapeTool {
+pub struct XCAFDocShapeTool {
     pub(crate) inner: UniquePtr<ffi::HandleXCAFDoc_ShapeTool>
 }
 
@@ -745,28 +745,31 @@ impl Shape {
     }
 }
 
-impl TDF_Label {
-    pub fn read_caf_step(path: impl AsRef<Path>) -> Result<(Vec<TDF_Label>, XCAFDoc_ShapeTool), Error> {
+impl TdfLabel {
+    pub fn read_caf_step(path: impl AsRef<Path>) -> Result<(Vec<TdfLabel>, XCAFDocShapeTool), Error> {
         let mut reader = ffi::STEPCAFControl_Reader_ctor();
-        ffi::read_caf_step(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
+        let result = ffi::read_caf_step(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
+        if result == ffi::IFSelect_ReturnStatus::IFSelect_RetError {
+            println!("ret error");
+        }
         let mut handle_doc = ffi::one_doc_caf_step(reader.pin_mut());
         let mut shape_tool = ffi::get_shape_tool(handle_doc.pin_mut());
         let mut label_seq = ffi::get_free_shapes_from_shape_tool(shape_tool.pin_mut());
         let label_number = ffi::get_label_sequence_length(label_seq.as_ref().unwrap());
-        let mut labels: Vec<TDF_Label> = Vec::new();
-        for n in 0..label_number {
-            let mut label = ffi::get_label_sequence_item_at(label_seq.pin_mut(), n);
-            labels.push(TDF_Label { inner: label });
+        let mut labels: Vec<TdfLabel> = Vec::new();
+        for n in 1..=label_number {
+            let label = ffi::get_label_sequence_item_at(label_seq.pin_mut(), n);
+            labels.push(TdfLabel { inner: label });
         }
         Ok((
             labels,
-            XCAFDoc_ShapeTool {
+            XCAFDocShapeTool {
                 inner: shape_tool
             }
         ))
     }
-    pub fn get_shape(&mut self, shape_tool: &mut XCAFDoc_ShapeTool) -> Shape {
-        let mut shape = ffi::get_label_shape(shape_tool.inner.pin_mut(), &*self.inner.pin_mut());
+    pub fn get_shape(&mut self, shape_tool: &mut XCAFDocShapeTool) -> Shape {
+        let shape = ffi::get_label_shape(shape_tool.inner.pin_mut(), &*self.inner.pin_mut());
         Shape{ inner: shape }
     }
     pub fn get_child_number(&mut self) -> i32 {
@@ -775,6 +778,10 @@ impl TDF_Label {
     pub fn get_child(&mut self, index: i32) -> Self {
         let label = ffi::find_label_child(&*self.inner, index);
         Self{ inner: label }
+    }
+
+    pub fn get_name(&mut self) -> String {
+        ffi::get_label_name(&*self.inner.pin_mut())
     }
 }
 

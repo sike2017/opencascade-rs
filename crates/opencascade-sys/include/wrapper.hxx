@@ -397,8 +397,8 @@ inline std::unique_ptr<TopoDS_Shape> one_shape_iges(const IGESControl_Reader &re
 inline IFSelect_ReturnStatus read_caf_step(STEPCAFControl_Reader &reader, rust::String theFileName) {
   reader.SetColorMode(true);
   reader.SetNameMode(true);
-  reader.SetLayerMode(true);
-  reader.SetMatMode(true);
+  //reader.SetLayerMode(true);
+  //reader.SetMatMode(true);
   reader.SetPropsMode(true); // 读取其他属性
   return reader.ReadFile(theFileName.c_str());
 }
@@ -455,7 +455,7 @@ inline int get_label_sequence_length(const TDF_LabelSequence &label_sequence) {
 }
 
 inline std::unique_ptr<TDF_Label> get_label_sequence_item_at(TDF_LabelSequence &label_sequence, int index) {
-    TDF_Label label = label_sequence.Value(index);
+    const TDF_Label& label = label_sequence.Value(index);
     return std::unique_ptr<TDF_Label>(new TDF_Label(label));
 }
 
@@ -480,10 +480,11 @@ inline rust::String get_label_name(const TDF_Label &label) {
     if (label.FindAttribute(TDataStd_Name::GetID(), nameAttr)) {
         ext_str = nameAttr->Get();
     }
-    Standard_PCharacter buffer{};
-    ext_str.ToUTF8CString(buffer);
-    std::string name_str = std::string(buffer);
-    return rust::String(name_str);
+    char* cstr = new char[ext_str.LengthOfCString() + 1];
+    ext_str.ToUTF8CString(cstr);
+    std::string std_str(cstr);
+    delete[] cstr;
+    return rust::String(std_str);
 }
 
 #endif

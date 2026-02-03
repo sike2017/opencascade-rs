@@ -24,7 +24,7 @@ pub mod ffi {
 
     #[derive(Debug)]
     #[repr(u32)]
-    pub enum IFSelect_ReturnStatus {
+    pub enum  IFSelect_ReturnStatus{
         IFSelect_RetVoid,
         IFSelect_RetDone,
         IFSelect_RetError,
