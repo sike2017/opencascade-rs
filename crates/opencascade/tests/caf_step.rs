@@ -17,7 +17,12 @@ fn it_can_read_caf_step() {
     let (top_labels, mut shape_tool) = primitives::TdfLabel::read_caf_step(step_path).expect("Failed to read STEP file");
     for mut label in top_labels {
         let label_shape = label.get_shape(&mut shape_tool);
-        let label_mesh = label_shape.mesh().expect("not a valid triangulation");
+        if label_shape.is_none() {
+            println!("top label: Name: {}, No shape associated", label.get_name());
+            continue;
+        }
+        let shape = label_shape.unwrap();
+        let label_mesh = shape.mesh().expect("not a valid triangulation");
         println!("top label: Name: {}, Vertices: {}, Indices: {}", label.get_name(), label_mesh.vertices.len(), label_mesh.indices.len());
         dfs_traverse(&mut label, &mut shape_tool);
     }

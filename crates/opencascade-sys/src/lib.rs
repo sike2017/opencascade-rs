@@ -1250,6 +1250,14 @@ pub mod ffi {
             label: &TDF_Label
         ) -> i32;
 
+        pub fn get_label_is_assembly(
+            label: &TDF_Label
+        ) -> bool;
+
+        pub fn get_label_is_shape(
+            label: &TDF_Label
+        ) -> bool;
+
         // Data Export
         type STEPControl_Writer;
         type IGESControl_Writer;

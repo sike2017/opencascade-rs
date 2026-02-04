@@ -768,9 +768,12 @@ impl TdfLabel {
             }
         ))
     }
-    pub fn get_shape(&mut self, shape_tool: &mut XCAFDocShapeTool) -> Shape {
+    pub fn get_shape(&mut self, shape_tool: &mut XCAFDocShapeTool) -> Option<Shape> {
         let shape = ffi::get_label_shape(shape_tool.inner.pin_mut(), &*self.inner.pin_mut());
-        Shape{ inner: shape }
+        if shape.is_null() {
+            return None;
+        }
+        Some(Shape{ inner: shape })
     }
     pub fn get_child_number(&mut self) -> i32 {
         ffi::get_label_child_number(&*self.inner.pin_mut())
@@ -782,6 +785,14 @@ impl TdfLabel {
 
     pub fn get_name(&mut self) -> String {
         ffi::get_label_name(&*self.inner.pin_mut())
+    }
+    
+    pub fn is_assembly(&self) -> bool {
+        ffi::get_label_is_assembly(&*self.inner)
+    }
+    
+    pub fn is_shape(&self) -> bool {
+        ffi::get_label_is_shape(&*self.inner)
     }
 }
 

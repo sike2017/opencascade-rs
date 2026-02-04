@@ -471,6 +471,9 @@ inline int get_label_child_number(const TDF_Label& label) {
 inline std::unique_ptr<TopoDS_Shape> get_label_shape(HandleXCAFDoc_ShapeTool &shape_tool, const TDF_Label &label) {
     TopoDS_Shape shape;
     shape_tool->GetShape(label, shape);
+    if (shape.IsNull()) {
+        return nullptr;
+    }
     return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(shape));
 }
 
@@ -485,6 +488,14 @@ inline rust::String get_label_name(const TDF_Label &label) {
     std::string std_str(cstr);
     delete[] cstr;
     return rust::String(std_str);
+}
+
+inline bool get_label_is_assembly(const TDF_Label &label) {
+    return XCAFDoc_ShapeTool::IsAssembly(label);
+}
+
+inline bool get_label_is_shape(const TDF_Label &label) {
+    return XCAFDoc_ShapeTool::IsShape(label);
 }
 
 #endif
